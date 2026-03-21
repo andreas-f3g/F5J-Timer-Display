@@ -1,7 +1,21 @@
 /* Shiftregister 74164 set
  * Character to bit sequence mapping
  *
+ * Utils to test hardware
+ *
 */
+
+// debug utils
+#define DBG_ON
+#ifdef DBG_ON
+#define DBG_PRINT_NL  Serial.println();
+#define DBG_PRINT(text)  Serial.print(text);
+#define DBG_PRINT_HEX(text)  Serial.print(text,HEX);
+#else
+#define DBG_PRINT_NL  ;
+#define DBG_PRINT(text) ;
+#define DBG_PRINT_HEX(text) ;
+#endif
 
 #include <SoftwareSerial.h>
 
@@ -40,6 +54,7 @@ unsigned char cmap[15]; // character map
 #define SEG_OFF 0
 
 // globals
+int   plop_step=0;
 char  phase='S';
 
 void setup() {
@@ -114,6 +129,11 @@ void clk() {
 unsigned char char2digit ( char c) {
   unsigned char ret=cmap[HYPHEN_IN_cmap];
   if ((c >= '0')&&(c<='9')) ret = cmap[c-'0'];
+  DBG_PRINT("char2digit (")
+  DBG_PRINT(c)
+  DBG_PRINT(") -> 0x")
+  DBG_PRINT_HEX(ret)
+  DBG_PRINT_NL
   return ret;
 }
 
@@ -127,6 +147,97 @@ void set_digits (unsigned char digit1, unsigned char digit2, unsigned char digit
     digitalWrite(SR_DIGIT_4_PIN, ((digit4 & mask) > 0) ? HIGH : LOW);
     clk();  // shift segment data
   }
+}
+
+void set_segment (unsigned char digit, unsigned char segment) {
+  reset(); // reset all
+
+  int digitPin; // map digit number
+  switch (digit) {
+    case '1': digitPin=SR_DIGIT_1_PIN; break;
+    case '2': digitPin=SR_DIGIT_2_PIN; break;
+    case '3': digitPin=SR_DIGIT_3_PIN; break;
+    case '4': digitPin=SR_DIGIT_4_PIN; break;
+    default: digitPin=SR_DIGIT_1_PIN;
+  }
+
+  unsigned char seg; // map segment id
+  switch (segment) {
+    case 'A':
+    case 'a': seg=0x80; break;
+    case 'B':
+    case 'b': seg=0x40; break;
+    case 'C':
+    case 'c': seg=0x20; break;
+    case 'D':
+    case 'd': seg=0x10; break;
+    case 'E':
+    case 'e': seg=0x08; break;
+    case 'F':
+    case 'f': seg=0x04; break;
+    case 'G':
+    case 'g': seg=0x02; break;
+    case ':': seg=0x01; break;
+    default:  seg=0x00;
+  }
+
+ 
+  for (int i=0; i<7; i++) { // set 8 segments in digit
+    unsigned char mask=0x80>>i;
+    digitalWrite(digitPin, ((seg & mask) > 0) ? HIGH : LOW);
+    DBG_PRINT("digit: ")
+    DBG_PRINT(digitPin - 1)
+    DBG_PRINT(" seg mask: -> ")
+    DBG_PRINT_HEX(mask)
+    DBG_PRINT(" ")
+    DBG_PRINT(((seg & mask) > 0) ? HIGH : LOW)
+    DBG_PRINT_NL
+    clk();  // shift segment data
+  }
+} // end set_segment
+
+void play_plop(int repeat)
+{
+  while ( repeat > 0) {
+    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F);
+    delay(120);
+    set_digits ( SEG_OFF, SEG_D + SEG_F + SEG_B, SEG_E + SEG_G + SEG_B, SEG_OFF);
+    delay(120);
+     set_digits ( SEG_OFF, SEG_A + SEG_C + SEG_E + SEG_G, SEG_A + SEG_C + SEG_D + SEG_F, SEG_OFF);
+    delay(120);
+     set_digits ( SEG_D + SEG_F, SEG_OFF, SEG_OFF, SEG_E + SEG_G);
+    delay(120);
+     set_digits ( SEG_OFF, SEG_A + SEG_C + SEG_E + SEG_G, SEG_A + SEG_C + SEG_D + SEG_F, SEG_OFF);
+    delay(120);
+    set_digits ( SEG_OFF, SEG_D + SEG_F + SEG_B, SEG_E + SEG_G + SEG_B, SEG_OFF);
+     delay(120);
+    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F);
+     repeat--;
+  }
+}
+
+void step_plop()
+{
+  switch (plop_step) {
+    case 1:
+      set_digits ( SEG_OFF, SEG_D + SEG_F + SEG_B, SEG_E + SEG_G + SEG_B, SEG_OFF);
+      break;
+    case 2:
+      set_digits ( SEG_OFF, SEG_A + SEG_C + SEG_E + SEG_G, SEG_A + SEG_C + SEG_D + SEG_F, SEG_OFF);
+      break;
+    case 3:
+      set_digits ( SEG_D + SEG_F, SEG_OFF, SEG_OFF, SEG_E + SEG_G);
+      break;
+    case 4:
+      set_digits ( SEG_OFF, SEG_A + SEG_C + SEG_E + SEG_G, SEG_A + SEG_C + SEG_D + SEG_F, SEG_OFF);
+      break;
+    case 5:
+      set_digits ( SEG_OFF, SEG_D + SEG_F + SEG_B, SEG_E + SEG_G + SEG_B, SEG_OFF);
+    default:
+      set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F);
+      plop_step = 0;
+  }
+  plop_step++;
 }
 
 void play_intro(int repeat)
@@ -190,6 +301,9 @@ void setDisplay(unsigned char * rec_char)
       && (rec_char[12]=='T')
   ) {
   phase = rec_char[11];
+  DBG_PRINT(" phase ")
+  DBG_PRINT(phase)
+  DBG_PRINT(" - ")
   switch (phase) {
     case 'P':  // prepare time
       set_digits (  char2digit(rec_char[10]), 
@@ -226,14 +340,77 @@ void loop() {
     if (c=='\r') { NL = true; rec_char[rec_index]=0x00; }
     else if ((rec_index<15) && (c!='\n')) { rec_char[rec_index++] = c; }
     if (NL) { 
- 
+      DBG_PRINT(">");
+      DBG_PRINT(rec_char); 
+      DBG_PRINT(": ");
+      
       switch (rec_char[0]) {
+
+        case 'C':
+        case 'c':
+          // test clock signal
+          // C<digit number>
+          // (i.e. "C3")
+            int digitPin; // map digit number
+            switch (rec_char[1]) {
+              case '1': digitPin=SR_DIGIT_1_PIN; break;
+              case '2': digitPin=SR_DIGIT_2_PIN; break;
+              case '3': digitPin=SR_DIGIT_3_PIN; break;
+              case '4': digitPin=SR_DIGIT_4_PIN; break;
+              default: digitPin=SR_DIGIT_1_PIN;
+            }
+            DBG_PRINT(" test clock (arduino PIN=")
+            DBG_PRINT(digitPin)
+            DBG_PRINT(")")
+            while (true) {
+              digitalWrite(digitPin, HIGH);
+              clk();
+              clk();
+              digitalWrite(digitPin, LOW);
+              clk();
+            }
+          break;
+
+        case 'P':
+        case 'p':
+          // P<count>
+          // play animation
+          if (rec_index>1) {
+            play_plop(rec_char[1]-'0');
+          }
+          break;
+
+        case 'I':
+        case 'i':
+          // P<count>
+          // play intro
+          if (rec_index>1) {
+            play_intro(rec_char[1]-'0');
+          }
+          break;
+
+        case 'X':
+        case 'x':
+          // X<digit number><segment number>
+          // set single segment (i.e. "X3E")
+          if (rec_index>=3) {
+            DBG_PRINT(" set digit ")
+            DBG_PRINT(rec_char[1])
+            DBG_PRINT(" segment ")
+            DBG_PRINT(rec_char[2])
+            DBG_PRINT_NL
+            set_segment(rec_char[1], rec_char[2]); 
+          }
+          break;
 
         case 'Y':
         case 'y':
           // Y<number/character>
           // set all digits to the same character (i.e. "Y2")
           if (rec_index>=2) {
+            DBG_PRINT(" set digits to ")
+            DBG_PRINT(rec_char[1])
+            DBG_PRINT_NL
             set_digits ( char2digit(rec_char[1]), char2digit(rec_char[1]), char2digit(rec_char[1]), cmap[ONE_AND_COLON_IN_cmap]);
           }
           break;
@@ -242,6 +419,7 @@ void loop() {
         case 'r':
           setDisplay(rec_char);
       }
+      DBG_PRINT_NL
       NL = false; 
       rec_index=0;
     }
@@ -251,10 +429,16 @@ void loop() {
   if (BTserial.available())
   {
     c = BTserial.read();
+    DBG_PRINT(c)
     if (c=='\r') { NL = true; rec_char[rec_index]=0x00; }
     else if ((rec_index<15) && (c!='\n')) { rec_char[rec_index++] = c; }
     if (NL) { // extended data gliderscore
+      DBG_PRINT_NL
+      DBG_PRINT(">")
+      DBG_PRINT(rec_char)
+      DBG_PRINT(": ")
       setDisplay(rec_char);
+      DBG_PRINT_NL
       NL = false; 
       rec_index=0;
     }    
