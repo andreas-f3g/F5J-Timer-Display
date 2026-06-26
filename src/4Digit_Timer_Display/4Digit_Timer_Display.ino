@@ -91,7 +91,7 @@ cmap[14]= 0x40; //  : |   | * |   |   |   |   |   |   |
 
   play_intro(2);
 
-  set_digits( cmap[HYPHEN_IN_cmap], cmap[HYPHEN_IN_cmap], cmap[HYPHEN_IN_cmap], cmap[COLON_IN_cmap], SEG_OFF);
+  set_digits( cmap[HYPHEN_IN_cmap], cmap[HYPHEN_IN_cmap], cmap[HYPHEN_IN_cmap], cmap[HYPHEN_IN_cmap], cmap[COLON_IN_cmap]);
 
   Serial.println("start ...");
 
@@ -200,7 +200,8 @@ void setDisplay(unsigned char * rec_char)
       set_digits (  char2digit(rec_char[10]), 
                     char2digit(rec_char[9]), 
                     char2digit(rec_char[8]),
-                    char2digit(rec_char[7]), 
+                    ((rec_char[7]>'0')?
+                    char2digit(rec_char[7]):0), 
                     (rec_char[10] & 0x1) ?
                     cmap[LOWER_COLON_IN_cmap] :
                     cmap[UPPER_COLON_IN_cmap] );
@@ -209,7 +210,8 @@ void setDisplay(unsigned char * rec_char)
       set_digits (  char2digit(rec_char[10]), 
                     char2digit(rec_char[9]), 
                     char2digit(rec_char[8]), 
-                    char2digit(rec_char[7]),
+                    ((rec_char[7]>'0')?
+                    char2digit(rec_char[7]):0),
                     cmap[COLON_IN_cmap]);
       break;
     case 'S':  // timer stoped with round/group display
