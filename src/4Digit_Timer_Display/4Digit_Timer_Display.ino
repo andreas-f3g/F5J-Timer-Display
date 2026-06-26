@@ -129,7 +129,7 @@ void set_digits (unsigned char digit1, unsigned char digit2, unsigned char digit
     digitalWrite(SR_DIGIT_2_PIN, ((digit2 & mask) > 0) ? HIGH : LOW);
     digitalWrite(SR_DIGIT_3_PIN, ((digit3 & mask) > 0) ? HIGH : LOW);
     digitalWrite(SR_DIGIT_4_PIN, ((digit4 & mask) > 0) ? HIGH : LOW);
-    digitalWrite(SR_COLON_PIN,   ((digit4 & mask) > 0) ? HIGH : LOW);
+    digitalWrite(SR_COLON_PIN,   ((digit5 & mask) > 0) ? HIGH : LOW);
     clk();  // shift segment data
   }
 }
