@@ -202,9 +202,9 @@ void setDisplay(unsigned char * rec_char)
                     char2digit(rec_char[8]),
                     ((rec_char[7]>'0')?
                     char2digit(rec_char[7]):0), 
-                    (rec_char[10] & 0x1) ?
+                    ((rec_char[10] & 0x1) ?
                     cmap[LOWER_COLON_IN_cmap] :
-                    cmap[UPPER_COLON_IN_cmap] );
+                    cmap[UPPER_COLON_IN_cmap]) );
       break;
     case 'W':  // working time
       set_digits (  char2digit(rec_char[10]), 
