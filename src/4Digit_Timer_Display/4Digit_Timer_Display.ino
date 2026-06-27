@@ -137,13 +137,13 @@ void set_digits (unsigned char digit1, unsigned char digit2, unsigned char digit
 void play_intro(int repeat)
 {
   while ( repeat > 0) {
+    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF);
+    delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_E + SEG_G, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_E + SEG_G, SEG_OFF, SEG_OFF);
-    delay(INTRO_DELAY);
-    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_D + SEG_F, SEG_OFF, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
@@ -155,13 +155,13 @@ void play_intro(int repeat)
     delay(INTRO_DELAY);
     set_digits ( SEG_C, SEG_C, SEG_C, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_B, SEG_B, SEG_B, SEG_OFF, SEG_OFF);
+    set_digits ( SEG_B, SEG_B, SEG_B, SEG_B, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_A, SEG_A, SEG_A, SEG_OFF, SEG_OFF);
+    set_digits ( SEG_A, SEG_A, SEG_A, SEG_A, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_B, SEG_B, SEG_B, SEG_OFF, SEG_OFF);
+    set_digits ( SEG_B, SEG_B, SEG_B, SEG_B, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_C, SEG_C, SEG_C, SEG_OFF, SEG_OFF);
+    set_digits ( SEG_C, SEG_C, SEG_C, SEG_C, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_E + SEG_G, SEG_OFF, SEG_OFF, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
@@ -171,15 +171,15 @@ void play_intro(int repeat)
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_D + SEG_F, SEG_OFF, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF);
-    delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_E + SEG_G, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
     set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_E + SEG_G, SEG_OFF);
     delay(INTRO_DELAY);
-    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_OFF, SEG_OFF);
+    set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_D + SEG_F, SEG_OFF);
+    delay(INTRO_DELAY);
+     set_digits ( SEG_OFF, SEG_OFF, SEG_OFF, SEG_OFF, SEG_OFF);
     delay(INTRO_DELAY);
      repeat--;
   }
